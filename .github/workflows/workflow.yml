@@ -2,9 +2,24 @@ name: deploy-toy-website
 
 on: [workflow_dispatch]
 
+env:
+    AZURE_RESOURCEGROUP_NAME: ToyWebsite
+    ENVIRONMENT: nonprod
+
+
 jobs:
-  say-hello:
+  deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: 'placeholder step'
-        run: echo "Hello world!"
+      # - name: 'placeholder step'
+      #   run: echo "Hello world! ${{ github.run_number }}"
+      - uses: actions/checkout@v2
+      - uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+      - uses: azure/arm-deploy@v1
+        with:
+          deploymentName: ${{ github.run_number }}
+          resourceGroupName: ${{ env.AZURE_RESOURCEGROUP_NAME }}
+          template: ./deploy/main.bicep
+          parameters: environmentType=${{ env.ENVIRONMENT }}
